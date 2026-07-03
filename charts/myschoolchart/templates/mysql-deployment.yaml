@@ -1,0 +1,60 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mysql
+
+spec:
+  selector:
+    matchLabels:
+      app: mysql
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app: mysql
+    spec:
+      containers:
+      - image: mysql:9.1       
+        name: mysql
+        imagePullPolicy: IfNotPresent
+        env:
+        - name: MYSQL_ROOT_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: mysql-secret
+              key: password
+        - name: MYSQL_DB
+          value: "MRPSKP"
+        - name: MYSQL_USER
+          value: "admin"
+        - name: MYSQL_PASSWORD
+          value: "admin"
+        ports:
+        - containerPort: 3306
+         # name: http-mysql-svc
+        volumeMounts:
+        - name: mysql-persistent-storage
+          mountPath: /var/lib/mysql
+        - name: usermanagement-dbcreation-script
+          mountPath: /docker-entrypoint-initdb.d #https://hub.docker.com/_/mysql Refer Initializing a fresh instance  
+      volumes:
+      - name: mysql-persistent-storage
+        persistentVolumeClaim:
+          claimName: mysql-pv-claim      
+      - name: usermanagement-dbcreation-script
+        configMap:
+          name: usermanagement-dbcreation-script
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: mysql-service
+spec:
+  selector:
+    app: mysql # labels should be the same as the ones used in the Pod's definition.
+  ports:
+    - protocol: TCP
+      port: 3306    #80  # port of the service.
+      targetPort: 3306 #http-mysql-svc #3306 # Port that the pods have exposed.
+  #clusterIP: None # This means we are going to use Pod IP . If you define a Service that has the .spec.clusterIP set to "None" then Kubernetes does not assign an IP address. 

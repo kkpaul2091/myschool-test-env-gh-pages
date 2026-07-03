@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: usermanagement-dbcreation-script
+data: 
+  mysql_usermgmt.sql: |-
+    DROP DATABASE IF EXISTS MRPSKP;
+    CREATE DATABASE MRPSKP; 
+    GRANT ALL ON *.* to 'admin'@'%';
+    use MRPSKP;
+    CREATE TABLE `students` (   `fname` varchar(20) DEFAULT NULL,   `lname` varchar(20) DEFAULT NULL,   `Gender` varchar(7) DEFAULT NULL,   `ID` int DEFAULT NULL,   `Subject` varchar(20) DEFAULT NULL,   `phone` varchar(20) DEFAULT NULL,   `AdminDate` date DEFAULT NULL );
